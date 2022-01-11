@@ -46,6 +46,8 @@
  *----------------------------------------------------------------------------*/
 
 #include "cs_headers.h"
+#include "cs_user_coupling.h"
+#include "cs_luma_coupling.h"
 
 /*----------------------------------------------------------------------------*/
 
@@ -78,6 +80,58 @@ BEGIN_C_DECLS
 void
 cs_user_saturne_coupling(void)
 {
+
+}
+
+/*----------------------------------------------------------------------------*/
+/*!
+ * \brief Define couplings with LUMA code.
+ *
+ * This is done by calling the \ref cs_luma_coupling_define function for each
+ * coupling to add.
+ */
+/*----------------------------------------------------------------------------*/
+
+ /*----------------------------------------------------------------------------*/
+/*!
+ * \brief Define new LUMA coupling.
+ *
+ * \param[in] luma_name         matching LUMA application name
+ * \param[in] boundary_criteria surface selection criteria, or NULL  // NOTE: I think this is the name of the boundary in CS. 
+ * \param[in] volume_criteria   volume selection criteria, or NULL   // NOTE: I think this is hte name of the region containing the desired cells in CS.
+ * \param[in] projection_axis   x', 'y', or 'y' for 2D projection axis (case
+ *                              independent), or ' ' for standard 3D coupling // NOTE: I don't think I need this for LUMA
+ * \param[in] allow_nonmatching allow nearest-neighbor mapping where matching
+ *                              within tolerance is not available (useful
+ *                              when meshes have a different level of detail)
+ * \param[in] tolerance         addition to local extents of each element
+ *                              extent = base_extent * (1 + tolerance)
+ * \param[in] verbosity         verbosity level
+ * \param[in] visualization     visualization output level (0 or 1)
+ * \param[in] vars_in           initial of the variables to write into CS: 
+                                "v" velocity, "t" temperature. So "vt" is velocity and temperature. 
+ * \param[in] vars_out          initial of the variables to read from CS and transfer to LUMA:
+                                "v" velocity, "t" temperature. So "vt" is velocity and temperature. 
+ *
+ * In the case of a single Code_Saturne and single LUMA instance, the
+ * 'luma_name' argument is ignored, as there is only one matching
+ * possibility.
+ *
+ * In case of multiple couplings, a coupling will be matched with available
+ * LUMA instances based on the 'luma_name' argument.
+ */
+/*----------------------------------------------------------------------------*/
+
+#pragma weak cs_user_luma_coupling
+void
+cs_user_luma_coupling(void)
+{
+	// variables to couple
+	// v = velocity
+	// t = temperature
+
+	int verbosity = 1;
+	cs_luma_coupling_define("LEFT", "Left",  "box[0.54, 0., 0., 0.55, 1.0, 0.2]", 'L', true, 1.0, verbosity, 0, "v", "v");
 
 }
 

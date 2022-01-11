@@ -344,6 +344,18 @@ interface
     real(kind=c_double), dimension(*), intent(inout) :: rcodcl
 
   end subroutine cs_syr_coupling_recv_boundary
+  
+  subroutine cs_luma_coupling_recv_boundary(nvar, bc_type, icodcl, rcodcl) &
+    bind(C, name = 'cs_luma_coupling_recv_boundary')
+
+    use, intrinsic :: iso_c_binding
+    implicit none
+    integer(kind=c_int), value :: nvar
+    integer(kind=c_int), dimension(*), intent(inout) :: bc_type
+    integer(kind=c_int), dimension(*), intent(inout) :: icodcl
+    real(kind=c_double), dimension(*), intent(inout) :: rcodcl
+
+  end subroutine cs_luma_coupling_recv_boundary
 
   subroutine cs_syr_coupling_exchange_volume() &
     bind(C, name = 'cs_syr_coupling_exchange_volume')
@@ -352,6 +364,14 @@ interface
     implicit none
 
   end subroutine cs_syr_coupling_exchange_volume
+  
+    subroutine cs_luma_coupling_send_volume() &
+    bind(C, name = 'cs_luma_coupling_send_volume')
+
+    use, intrinsic :: iso_c_binding
+    implicit none
+
+  end subroutine cs_luma_coupling_send_volume
 
   subroutine strpre(itrale, italim, ineefl, impale, xprale, cofale)
 
@@ -480,8 +500,12 @@ endif
 if (itrfin.eq.1 .and. itrfup.eq.1) then
 
   call cs_syr_coupling_exchange_volume
+  
+  call cs_luma_coupling_send_volume
 
   call cs_syr_coupling_recv_boundary(nvar, itypfb, icodcl, rcodcl)
+  
+  call cs_luma_coupling_recv_boundary(nvar, itypfb, icodcl, rcodcl)
 
   if (nfpt1t.gt.0) then
     call cou1di(nfabor, iscalt, icodcl, rcodcl)

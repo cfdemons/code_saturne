@@ -111,6 +111,7 @@
 #include "cs_sles_default.h"
 #include "cs_sat_coupling.h"
 #include "cs_syr_coupling.h"
+#include "cs_luma_coupling.h"
 #include "cs_system_info.h"
 #include "cs_time_moment.h"
 #include "cs_timer.h"
@@ -237,6 +238,7 @@ _run(void)
 
   cs_gui_syrthes_coupling();
   cs_user_syrthes_coupling();
+  cs_user_luma_coupling();
   cs_user_saturne_coupling();
 
   /* Initialize Fortran API and calculation setup */
@@ -295,6 +297,7 @@ _run(void)
   /* Initialize couplings and communication if necessary */
 
   cs_syr_coupling_all_init();
+  cs_luma_coupling_all_init();
   cs_sat_coupling_all_init();
 
   cs_paramedmem_coupling_all_init();
@@ -357,6 +360,11 @@ _run(void)
   if (check_mask && cs_syr_coupling_n_couplings())
     bft_error(__FILE__, __LINE__, 0,
               _("Coupling with SYRTHES is not possible in mesh preprocessing\n"
+                "or verification mode."));
+				
+	if (check_mask && cs_luma_coupling_n_couplings())
+    bft_error(__FILE__, __LINE__, 0,
+              _("Coupling with LUMA is not possible in mesh preprocessing\n"
                 "or verification mode."));
 
   if (opts.preprocess == false && opts.benchmark <= 0) {
@@ -427,6 +435,8 @@ _run(void)
           /* Setup couplings and fixed-mesh postprocessing */
 
           cs_syr_coupling_init_meshes();
+		  
+		  cs_luma_coupling_init_meshes();
 
           cs_paramedmem_coupling_define_mesh_fields();
 
