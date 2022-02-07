@@ -63,6 +63,7 @@
 #include "fvm_selector.h"
 
 #include "cs_coupling.h"
+#include "cs_field.h"
 #include "cs_log.h"
 #include "cs_mesh.h"
 #include "cs_mesh_quantities.h"
@@ -1390,7 +1391,7 @@ cs_luma_coupling_send_data(cs_luma_coupling_t      *luma_coupling,
                              int                  mode)
 						  // int  i)	 
 {
-	printf("CS: Hi I'm in the sending data function. \n");
+	//printf("CS: Hi I'm in the sending data function. \n");
 
   cs_luma_coupling_ent_t  *coupling_ent = NULL;
 
@@ -1417,7 +1418,7 @@ cs_luma_coupling_send_data(cs_luma_coupling_t      *luma_coupling,
 	BFT_MALLOC(send_var, n_dist, double);
 	
 	for (int i = 0; i< n_dist; i++)
-		send_var[i] = t_cs[dist_loc[i] - 1];  // -1 has to do with Fortran and C indexing but I don't understand why 
+		send_var[i] = t_cs[dist_loc[i]];  // -1 has to do with Fortran and C indexing but I don't understand why 
 	                                          // this is not done when the data is received from LUMA. 
 		
 	ple_locator_exchange_point_var(coupling_ent->locator,
@@ -1442,15 +1443,25 @@ cs_luma_coupling_send_data(cs_luma_coupling_t      *luma_coupling,
   {	
 	double* send_var = NULL;
 	BFT_MALLOC(send_var, 3 * n_dist, double);
-	
-	for (int i = 0; i< n_dist; i++)
-	{
+
+  double flowrate1 = 0.;
+  for (int i = 0; i < n_dist; i++)
+  {
 		for (int ic = 0; ic < 3; ic++)
-      send_var[3 * i + ic] = v_cs[3 * dist_loc[i] + ic - 1];  // -1 has to do with Fortran and C indexing but I don't understand why 
-	                                          // this is not done when the data is received from LUMA. 
-	}
-	
-	printf("CS: Data ready to send to LUMA. \n");
+      send_var[3 * i + ic] = v_cs[3 * i + ic];//v_cs[3 * dist_loc[i] + ic];  // -1 has to do with Fortran and C indexing but I don't understand why 
+	                                          // this is not done when the data is received from LUMA.
+/*     printf("---------I am here check the velocity ux \n---------");*/
+//    printf("%e ", send_var[3 * i + 0]); 
+
+    //flowrate1 += send_var[3 * i] * 0.01*0.01;
+    
+/*      printf("---------I am checking what are dist_loc \n---------");
+     printf("%d \n", dist_loc[i]);  */
+
+  }
+  //printf("++++++CS: send the flowrate1 to LUMA: %e++++++ \n", flowrate1);
+
+  //printf("CS: Data ready to send to LUMA. \n");
 		
 	ple_locator_exchange_point_var(coupling_ent->locator,
                                  send_var,
@@ -1460,23 +1471,23 @@ cs_luma_coupling_send_data(cs_luma_coupling_t      *luma_coupling,
                                  3,
                                  0);
 								 
-	printf("CS: Data sent to LUMA. \n");
+	//printf("CS: Data sent to LUMA. \n");
 								 
 	if (coupling_ent->n_elts > 0) 
 	{
 		cs_lnum_t i;
-    double flowrate = 0.;
+    //double flowrate2 = 0.;
     for (i = 0; i < coupling_ent->n_elts; i++)
     {
 			for (int j = 0; j < 3; j++)
 				coupling_ent->vel_out[3*i+j] = v_cs[3*i+j];
-      flowrate += v_cs[3 * i]*0.01*0.01;
+      //flowrate2 += v_cs[3 * i]*0.01*0.01;
     }
-  printf("++++++CS: send the flowrate to LUMA: %f++++++ \n", flowrate);
+   //printf("++++++CS: send the flowrate2 to LUMA: %f++++++ \n", flowrate2);
   }
 
   BFT_FREE(send_var);
-  printf("CS: just freed send_var \n");
+  //printf("CS: just freed send_var \n");
   }
   
 }
@@ -1491,133 +1502,132 @@ cs_luma_coupling_send_data(cs_luma_coupling_t      *luma_coupling,
 void
 cs_luma_coupling_send_volume(void)
 {
-  printf("CS: I'm in the send volume to LUMA function \n");
+  //printf("CS: I'm in the send volume to LUMA function \n");
 
   const int kcpluma = cs_field_key_id("luma_coupling");
 
   /* Get number of coupling cases */
 
   int n_cpl = cs_luma_coupling_n_couplings();
-  
+  // This is Marta's work send, the data back to LUMA
   /* Loop on couplings: get boundary temperature and/or velocity array for each coupling
-	   and apply matching boundary condition. */
+    and apply matching boundary condition. */
 
-	for (int cpl_id = 0; cpl_id < n_cpl; cpl_id++) {
-
-		cs_luma_coupling_t *luma_coupling = cs_luma_coupling_by_id(cpl_id);
-		
-		printf("CS: Number of couplings with LUMA: %d . \n", n_cpl);
-
-		if (! cs_luma_coupling_is_vol(luma_coupling))  /* ignore if surface-only */
-			continue;
-			
-		printf("CS: The coupling is volume, right? \n");
-
-		// TODO: This will have to be adapted to having multiple coupled meshes. This will have to be a double loop. 
-		// So from here on it will loop through the different coupled meshes. luma_coupling->cells[m]. 
-
-		cs_lnum_t n_cpl_cells = cs_luma_coupling_get_n_elts(luma_coupling, 1);
-
-		/* Get list of coupled cells */
-
-		cs_lnum_t  *c_ids = NULL;
-		BFT_MALLOC(c_ids, n_cpl_cells, cs_lnum_t);
-		cs_luma_coupling_get_elt_ids(luma_coupling, c_ids, 1);
-
-    printf("CS: cellIDS 30: %u \n", c_ids[30]);
-
-    /*  Obtain velocity / temperature to luma */
-
-		cs_real_t *t_cs = NULL;
-		cs_real_t *v_cs = NULL;
-
-		// Only allocate the data that will be sent to LUMA
-		if(luma_coupling->cells->is_temp_out)
-			BFT_MALLOC(t_cs, n_cpl_cells, cs_real_t);
-		if(luma_coupling->cells->is_vel_out)
+   for (int cpl_id = 0; cpl_id < n_cpl; cpl_id++)
     {
-      BFT_MALLOC(v_cs, 3 * n_cpl_cells, cs_real_t);
-      printf("CS: v_cs allocated. \n");
-    }
-			
-		
-	
-		// Scalar field coupling (i e. temperature) //
-		// If we need to send temperature from LUMA
-		if(luma_coupling->cells->is_temp_out)
-		{
-			printf("CS: Hi! I need to send temperature data to LUMA! \n");
-			
-			if (cs_glob_physical_model_flag[CS_COMPRESSIBLE] >= 0) 
-			{
-			 bft_error
-				(__FILE__, __LINE__, 0,
-				 _("Coupling with LUMA is not possible for compressible flow."));
-			}
-			
-			// Get CS temperature field
-			// NOTE: Fragment extracted from /*Dirichlet for velocity*/ 
-			// in cs_gui_boundary_conditions.c, lines 1953 to 1968
-			const cs_field_t* ft = cs_field_by_name_try("temperature");
-			//const int var_key_id = cs_field_key_id("variable_id");
-			//int ivarv = cs_field_get_key_int(fv, var_key_id) - 1;
-			
-			const cs_real_t* cvar_t = (const cs_real_t*)ft->val;
-			
-			// NOTE: Does it have to first create an array with only the cells in the coupled region
-			// because the point location functions in CS give the indices related to the coupled cells only?
-			// Not indices related to the whole mesh?
-			for (cs_lnum_t i = 0; i < n_cpl_cells; i++) 
-				 t_cs[i] = cvar_t[c_ids[i]];
 
-		} // End temperature coupling
-	  
-		// If we need to send velocity to LUMA
-		if(luma_coupling->cells->is_vel_out)
-		{
-			printf("CS: Hi! I need to send velocity data to LUMA! \n"); 
-			
-			// Get CS velocity field
-			const cs_field_t *fv = cs_field_by_name_try("velocity");			
-			const cs_real_t* cvar_v = (const cs_real_t*)fv->val;
-			
-			
-			// NOTE: Does it have to first create an array with only the cells in the coupled region
-			// because the point location functions in CS give the indices related to the coupled cells only?
-			// Not indices related to the whole mesh?
-			for (cs_lnum_t i = 0; i < n_cpl_cells; i++) 
-			{
-        cs_lnum_t cid = c_ids[i];
-				
-				for (cs_lnum_t ic = 0; ic < 3; ic++)
-					v_cs[3 * i + ic] = cvar_v[3 * cid + ic]; // NOTE: I'm really not sure this is how the velocity data is stored...
+      cs_luma_coupling_t *luma_coupling = cs_luma_coupling_by_id(cpl_id);
 
-			}
-  
-		} // End velocity coupling
-		
-		printf("CS: Hello before sending data to LUMA \n");
-	
-		cs_luma_coupling_send_data(luma_coupling, t_cs, v_cs, 1);
+      //printf("CS: Number of couplings with LUMA: %d . \n", n_cpl);
 
-    printf("CS: Hello after sending data to LUMA. \n");
+      if (!cs_luma_coupling_is_vol(luma_coupling)) // ignore if surface-only
+        continue;
 
-    //NOTE: I don't understand why freeing c_ids gives a free(): invalid pointer error. 
-		BFT_FREE(c_ids);
-    printf("CS: just freed c_ids\n");
- 		if (luma_coupling->cells->is_temp_out)
-    {
-      BFT_FREE(t_cs);
-      printf("CS: just freed t_cs\n");
-    }
-			
-		if (luma_coupling->cells->is_vel_out)
-    {
-      BFT_FREE(v_cs);
-      printf("CS: just freed v_cs\n");
-    }
-		
-	} /* End loop on couplings */
+      //printf("CS: The coupling is volume, right? \n");
+
+      // TODO: This will have to be adapted to having multiple coupled meshes. This will have to be a double loop.
+      // So from here on it will loop through the different coupled meshes. luma_coupling->cells[m].
+
+      cs_lnum_t n_cpl_cells = cs_luma_coupling_get_n_elts(luma_coupling, 1);
+
+      // Get list of coupled cells
+
+      cs_lnum_t *c_ids = NULL;
+      BFT_MALLOC(c_ids, n_cpl_cells, cs_lnum_t);
+      cs_luma_coupling_get_elt_ids(luma_coupling, c_ids, 1);
+
+      //printf("CS: cellIDS 30: %u \n", c_ids[30]);
+
+      // Obtain velocity / temperature to luma 
+
+      cs_real_t *t_cs = NULL;
+      cs_real_t *v_cs = NULL;
+
+      // Only allocate the data that will be sent to LUMA
+      if (luma_coupling->cells->is_temp_out)
+        BFT_MALLOC(t_cs, n_cpl_cells, cs_real_t);
+      if (luma_coupling->cells->is_vel_out)
+      {
+        BFT_MALLOC(v_cs, 3 * n_cpl_cells, cs_real_t);
+        //printf("CS: v_cs allocated. \n");
+      }
+
+      // Scalar field coupling (i e. temperature) //
+      // If we need to send temperature from LUMA
+      if (luma_coupling->cells->is_temp_out)
+      {
+        //printf("CS: Hi! I need to send temperature data to LUMA! \n");
+
+        if (cs_glob_physical_model_flag[CS_COMPRESSIBLE] >= 0)
+        {
+          bft_error(__FILE__, __LINE__, 0,
+                    _("Coupling with LUMA is not possible for compressible flow."));
+        }
+
+        // Get CS temperature field
+        // NOTE: Fragment extracted from Dirichlet for velocity
+        // in cs_gui_boundary_conditions.c, lines 1953 to 1968
+        const cs_field_t *ft = cs_field_by_name_try("temperature");
+        //const int var_key_id = cs_field_key_id("variable_id");
+        //int ivarv = cs_field_get_key_int(fv, var_key_id) - 1;
+
+        const cs_real_t *cvar_t = (const cs_real_t *)ft->val;
+
+        // NOTE: Does it have to first create an array with only the cells in the coupled region
+        // because the point location functions in CS give the indices related to the coupled cells only?
+        // Not indices related to the whole mesh?
+        for (cs_lnum_t i = 0; i < n_cpl_cells; i++)
+          t_cs[i] = cvar_t[c_ids[i]];
+
+      } // End temperature coupling
+
+      // If we need to send velocity to LUMA
+      if (luma_coupling->cells->is_vel_out)
+      {
+        //printf("CS: Hi! I need to send velocity data to LUMA! \n");
+
+        // Get CS velocity field
+        const cs_field_t *fv = cs_field_by_name_try("velocity");
+        const cs_real_t *cvar_v = (const cs_real_t *)fv->val;
+
+        // NOTE: Does it have to first create an array with only the cells in the coupled region
+        // because the point location functions in CS give the indices related to the coupled cells only?
+        // Not indices related to the whole mesh?
+        for (cs_lnum_t i = 0; i < n_cpl_cells; i++)
+        {
+          cs_lnum_t cid = c_ids[i];
+
+          for (cs_lnum_t ic = 0; ic < 3; ic++)
+            v_cs[3 * i + ic] = cvar_v[3 * cid + ic]; // NOTE: I'm really not sure this is how the velocity data is stored...
+        
+          // I am testing the data extract from CS is correct
+          //printf("%e ", v_cs[3 * i]);
+        }
+
+      } // End velocity coupling
+
+      //printf("CS: Hello before sending data to LUMA \n");
+
+      cs_luma_coupling_send_data(luma_coupling, t_cs, v_cs, 1);
+
+      //printf("CS: Hello after sending data to LUMA. \n");
+
+      //NOTE: I don't understand why freeing c_ids gives a free(): invalid pointer error.
+      BFT_FREE(c_ids);
+      //printf("CS: just freed c_ids\n");
+      if (luma_coupling->cells->is_temp_out)
+      {
+        BFT_FREE(t_cs);
+        //printf("CS: just freed t_cs\n");
+      }
+
+      if (luma_coupling->cells->is_vel_out)
+      {
+        BFT_FREE(v_cs);
+        //printf("CS: just freed v_cs\n");
+      }
+
+    }  // End loop on couplings
 	
 }
  
@@ -1636,10 +1646,10 @@ void
 cs_luma_coupling_recv_data(cs_luma_coupling_t      *luma_coupling,
 							 cs_real_t            t_luma[],
 							 cs_real_t            v_luma[],
-                             int                  mode)
+                             int                  mode) 
 						  // int  i)	 
 {
-	printf("CS: Hi I'm in the receiving data function. \n");
+	//printf("CS: Hi I'm in the receiving data function. \n");
 
   cs_luma_coupling_ent_t  *coupling_ent = NULL;
 
@@ -1653,7 +1663,7 @@ cs_luma_coupling_recv_data(cs_luma_coupling_t      *luma_coupling,
   if (coupling_ent == NULL)
     return;
 
-  printf("CS: Hey! The coupling entity is not null. Is temp in? %d \n", coupling_ent->is_temp_in);
+  //printf("CS: Hey! The coupling entity is not null. Is temp in? %d \n", coupling_ent->is_temp_in);
 
   /* Receive data */
 
@@ -1678,7 +1688,7 @@ cs_luma_coupling_recv_data(cs_luma_coupling_t      *luma_coupling,
   if(coupling_ent->is_vel_in)
   {	
 	v_luma[0] = -1.0;
-	printf("CS: Receiving velocity data... %f \n", v_luma[0]);
+	//printf("CS: Receiving velocity data... %f \n", v_luma[0]);
 	  
 	ple_locator_exchange_point_var(coupling_ent->locator,
                                  NULL,
@@ -1688,7 +1698,7 @@ cs_luma_coupling_recv_data(cs_luma_coupling_t      *luma_coupling,
                                  3,
                                  0);
 								 
-	printf("CS: Velocity data received... %f, %f, %f \n", v_luma[0], v_luma[1], v_luma[2]);
+	//printf("CS: Velocity data received... %f, %f, %f \n", v_luma[0], v_luma[1], v_luma[2]);
 	
 	if (coupling_ent->n_elts > 0) 
 	{
@@ -1838,7 +1848,7 @@ cs_luma_coupling_recv_boundary(int        nvar,
 	 The values received from LUMA will be incorporated into the coupled CS boundary
 	 ====================================== */
 	 
-	printf("CS: Hi! CS is calling the LUMA coupling function!\n");
+	//printf("CS: Hi! CS is calling the LUMA coupling function!\n");
 
 	const int kcpluma  = cs_field_key_id("luma_coupling");
 
@@ -1857,12 +1867,12 @@ cs_luma_coupling_recv_boundary(int        nvar,
 
 		cs_luma_coupling_t *luma_coupling = cs_luma_coupling_by_id(cpl_id);
 		
-		printf("CS: Number of couplings with LUMA: %d . \n", n_cpl);
+		//printf("CS: Number of couplings with LUMA(reveice layer): %d . \n", n_cpl);
 
 		if (! cs_luma_coupling_is_surf(luma_coupling))  /* ignore if volume-only */
 			continue;
 			
-		printf("CS: The coupling is surface, right? \n");
+		//printf("CS: The coupling is surface, right? \n");
 
 		// TODO: This will have to be adapted to having multiple coupled meshes. This will have to be a double loop. 
 		// So from here on it will loop through the different coupled meshes. luma_coupling->faces[m]. 
@@ -1886,17 +1896,17 @@ cs_luma_coupling_recv_boundary(int        nvar,
 		if(luma_coupling->faces->is_vel_in)
 			BFT_MALLOC(v_luma, 3 * n_cpl_faces, cs_real_t);
 
-		printf("CS: Hello before receiving data from LUMA \n");
+		//printf("CS: Hello before receiving data from LUMA \n");
 	
 		cs_luma_coupling_recv_data(luma_coupling, t_luma, v_luma, 0);
 		
-		printf("CS: Hello after receiving data from LUMA \n");
+		//printf("CS: Hello after receiving data from LUMA \n");
 
 		// Scalar field coupling (i e. temperature) //
 		// If we received temperature from LUMA
 		if(luma_coupling->faces->is_temp_in)
 		{
-			printf("CS: Hi! I've received temperature data from LUMA! \n");
+			//printf("CS: Hi! I've received temperature data from LUMA! \n");
             
       // Dirichlet for temperature
       // Check in cs_gui_boundary_conditions.s file the setting
@@ -2001,7 +2011,7 @@ cs_luma_coupling_recv_boundary(int        nvar,
 		// If we received velocity from LUMA
 		if(luma_coupling->faces->is_vel_in)
 		{
-			printf("CS: Hi! I've received velocity data from LUMA! \n"); 
+			//printf("CS: Hi! I've received velocity data from LUMA! \n"); 
 			
 			// NOTE: Fragment extracted from /*Dirichlet for velocity*/ 
 			// in cs_gui_boundary_conditions.c, lines 1953 to 1968
@@ -2034,8 +2044,9 @@ cs_luma_coupling_recv_boundary(int        nvar,
 					
 					// Set the value of each velocity component
 					rcodcl[(ivarv + ic) * n_b_faces + face_id] = v_luma[3 * i + ic];
-				}
-				flowRate += v_luma[3 * i] * 0.01 * 0.01;
+        }
+        //printf("%d ", (ivarv + 0) * n_b_faces + face_id);
+        flowRate += v_luma[3 * i] * 0.005 * 0.005;
 			}
 			//double totalFlowRate = 0;
 			//MPI_Allreduce(flowRate, totalFlowRate,1,MPI_DOUBLE, MPI_SUM, cs_glob_mpi_comm);
