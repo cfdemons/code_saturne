@@ -131,7 +131,7 @@ cs_user_luma_coupling(void)
 	// t = temperature
 
 	int verbosity = 1;
-	cs_luma_coupling_define("LEFT", "Left", "box[0.595, 0.005, 0, 0.600, 1.005, 0.025]", 'L', true, 1.0, verbosity, 0, "v", "v");
+	cs_luma_coupling_define("LEFT", "Left", "box[0.54, 0.01, 0, 0.55, 1.01, 0.05]", 'L', true, 1.0, verbosity, 0, "v", "v");
 
 }
 
