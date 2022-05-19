@@ -860,16 +860,12 @@ _create_coupled_ent(cs_luma_coupling_t  *luma_coupling,
 					   
 	printf("CS: Hi after ple_locator_set_mesh \n");
 
-  /* Check that all points are effectively located */
-  
-  // Print cs_to_luma_dist ////
-   //printf( "CS: number of coupled elements %d \n", coupling_ent->n_elts);
+   printf( "*-*-*-*-*-I am testing the location from the distant mesh in CS part*-*-*-*-*-*-*-*-* \n" );
 
-   /*if(luma_coupling->visualization != 0) // cs_to_luma_dist doesn't exist if visualisation is 0.
-   {
-		for (int num = 0; num < 200; num++)
-			printf("CS: Distance from mesh to LUMA element %d is %f \n", num, cs_to_luma_dist[num]);
-   }*/
+	size_t nCoupledPoints = ple_locator_get_n_dist_points(coupling_ent->locator);
+	const cs_lnum_t* IDCoupledPoints = ple_locator_get_dist_locations(coupling_ent->locator);
+	for (int ii = 0; ii < nCoupledPoints; ii++)
+		printf( "%d  ", IDCoupledPoints[ii]); 
    
 
   location_complete = _is_location_complete(luma_coupling,
@@ -926,6 +922,10 @@ _create_coupled_ent(cs_luma_coupling_t  *luma_coupling,
     bft_printf(_(" [ok]\n"));
     bft_printf_flush();
   }
+
+  /* Shift from 1-base to 0-based locations */
+
+  ple_locator_shift_locations(coupling_ent->locator, -1);
 
   if (location_elts != coupling_ent->elts)
     fvm_nodal_destroy(location_elts);
@@ -1445,18 +1445,12 @@ cs_luma_coupling_send_data(cs_luma_coupling_t      *luma_coupling,
 	BFT_MALLOC(send_var, 3 * n_dist, double);
 
   double flowrate1 = 0.;
+  //printf("---------I am checking what are dist_loc \n---------");
   for (int i = 0; i < n_dist; i++)
   {
-		for (int ic = 0; ic < 3; ic++)
-      send_var[3 * i + ic] = v_cs[3 * i + ic];//v_cs[3 * dist_loc[i] + ic];  // -1 has to do with Fortran and C indexing but I don't understand why 
+    for (int ic = 0; ic < 3; ic++)
+      send_var[3 * i + ic] = v_cs[3 * dist_loc[i] + ic]; // -1 has to do with Fortran and C indexing but I don't understand why 
 	                                          // this is not done when the data is received from LUMA.
-/*     printf("---------I am here check the velocity ux \n---------");*/
-//    printf("%e ", send_var[3 * i + 0]); 
-
-    //flowrate1 += send_var[3 * i] * 0.01*0.01;
-    
-/*      printf("---------I am checking what are dist_loc \n---------");
-     printf("%d \n", dist_loc[i]);  */
 
   }
   //printf("++++++CS: send the flowrate1 to LUMA: %e++++++ \n", flowrate1);
