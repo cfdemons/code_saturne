@@ -124,6 +124,7 @@ cs_io.h \
 cs_log.h \
 cs_log_iteration.h \
 cs_log_setup.h \
+cs_luma_coupling.h \
 cs_map.h \
 cs_mass_source_terms.h \
 cs_math.h \
@@ -286,6 +287,7 @@ cs_interpolate.c \
 csinit.f90 \
 cs_log_iteration.c \
 cs_log_setup.c \
+cs_luma_coupling.c \
 cs_notebook.c \
 cs_numbering.c \
 cs_measures_util.c \
