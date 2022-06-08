@@ -181,13 +181,19 @@ cs_coupling_discover_mpi_apps(const char  *app_name,
 {
   int mpi_flag;
   int world_size;
-
+  
+  printf("hello at the begining of discover mpi apps\n");
+  
   MPI_Initialized(&mpi_flag);
+  
+  printf("hello after mpi initialised\n");
 
   if (!mpi_flag)
     return;
 
   MPI_Comm_size(MPI_COMM_WORLD, &world_size);
+  
+  printf("global ranks: %d world size: %d \n",cs_glob_n_ranks, world_size);
 
   if (cs_glob_n_ranks < world_size) {
 
@@ -225,6 +231,8 @@ cs_coupling_discover_mpi_apps(const char  *app_name,
                                       app_name,
                                       MPI_COMM_WORLD,
                                       cs_glob_mpi_comm);
+									  
+	printf("Hello after ple_coupling_mpi_set_create\n");
 
     n_apps = ple_coupling_mpi_set_n_apps(_cs_glob_coupling_mpi_app_world);
     app_id = ple_coupling_mpi_set_get_app_id(_cs_glob_coupling_mpi_app_world);
@@ -314,7 +322,7 @@ cs_coupling_get_sync_flag(void)
  *
  * This flag is used by all couplings based on the PLE (Parallel Location
  * and Exchange) group synchronization mechanism, which include couplings
- * with SYRTHES, code_saturne, and neptune_cfd.
+ * with SYRTHES, LUMA, code_saturne, and neptune_cfd.
  *
  * It is defined by a mask, so for example flags f1, f2, and f3 may be
  * combined using the "f1 | f2 | f2" syntax.
@@ -643,6 +651,7 @@ cs_coupling_mesh_extents(const void  *mesh,
                          double       tolerance,
                          double       extents[])
 {
+	printf("CS: I'm in mesh extends\n");
   const fvm_nodal_t  *m = mesh;
   ple_lnum_t retval = 0;
 
@@ -661,6 +670,8 @@ cs_coupling_mesh_extents(const void  *mesh,
     fvm_nodal_extents(m, tolerance, extents);
     retval = 1;
   }
+  
+  printf("CS: max extends %d. Xmin = %f, ymin = %f, zmin = %f, xmax = %f, ymax = %f, zmax = %f \n", n_max_extents, extents[0], extents[1], extents[2], extents[3], extents[4], extents[5]);
 
   return retval;
 }
