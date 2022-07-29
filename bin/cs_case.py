@@ -864,12 +864,13 @@ class case:
             luma_dir = os.path.join(d.case_dir, "LUMA")
             exec_dir = os.path.join(d.exec_dir, "LUMA")
             shutil.copyfile(luma_dir, exec_dir)
-            path_exec_input = os.path.join(d.exec_dir, "input")
-            os.mkdir(path_exec_input)
             path_input = os.path.join(d.case_dir, "input")
-            for f in os.listdir(path_input):
-                p = os.path.join(path_input,f)
-                shutil.copy(p,path_exec_input)
+            if os.path.exists(path_input):
+                path_exec_input = os.path.join(d.exec_dir, "input")
+                os.mkdir(path_exec_input)
+                for f in os.listdir(path_input):
+                    p = os.path.join(path_input,f)
+                    shutil.copy(p,path_exec_input)
             s_args = d.solver_command()
             if len(cmd) > 0:
                 cmd += ' : '
