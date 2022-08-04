@@ -864,6 +864,7 @@ class case:
             luma_dir = os.path.join(d.case_dir, "LUMA")
             exec_dir = os.path.join(d.exec_dir, "LUMA")
             shutil.copyfile(luma_dir, exec_dir)
+            shutil.copymode(luma_dir, exec_dir)
             path_input = os.path.join(d.case_dir, "input")
             if os.path.exists(path_input):
                 path_exec_input = os.path.join(d.exec_dir, "input")
