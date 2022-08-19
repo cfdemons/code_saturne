@@ -832,12 +832,17 @@ class case:
 
         app_id = 0
 
+        if mpi_env.mpiexec == 'srun':
+            wdiropt = " --chdir "
+        else:
+            wdiropt = " -wdir "
+
         for d in self.syr_domains:
             s_args = d.solver_command()
             if len(cmd) > 0:
                 cmd += ' : '
             cmd += '-n ' + str(d.n_procs) \
-                + ' -wdir ' + os.path.basename(s_args[0]) \
+                + wdiropt + os.path.basename(s_args[0]) \
                 + ' ' + s_args[1] + s_args[2]
             app_id += 1
 
@@ -846,7 +851,7 @@ class case:
             if len(cmd) > 0:
                 cmd += ' : '
             cmd += '-n ' + str(d.n_procs) \
-                + ' -wdir ' + os.path.basename(s_args[0]) \
+                + wdiropt + os.path.basename(s_args[0]) \
                 + ' ' + s_args[1] + s_args[2]
             app_id += 1
 
@@ -855,7 +860,7 @@ class case:
             if len(cmd) > 0:
                 cmd += ' : '
             cmd += '-n ' + str(d.n_procs) \
-                + ' -wdir ' + os.path.basename(s_args[0]) \
+                + wdiropt + os.path.basename(s_args[0]) \
                 + ' ' + s_args[1] + s_args[2]
             app_id += 1
 			
@@ -876,7 +881,7 @@ class case:
             if len(cmd) > 0:
                 cmd += ' : '
             cmd += '-n ' + str(d.n_procs) \
-                + ' -wdir ' + os.path.basename(s_args[0]) \
+                + wdiropt + os.path.basename(s_args[0]) \
                 + ' ' + s_args[1] + s_args[2]
             app_id += 1
 
