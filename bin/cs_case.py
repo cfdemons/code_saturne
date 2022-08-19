@@ -949,14 +949,26 @@ class case:
             rank_id += d.n_procs
 			
         for d in self.luma_domains:
-            s_args = d.solver_command()
-            #_pypath, _pyscript = s_args[1].split(" ")
-            _rundir = os.path.basename(s_args[0])
 
-            cmd  = '%d-%d\t' % (rank_id, rank_id + d.n_procs - 1)
-            cmd += '%s\t' % (_rundir)
-            cmd += s_args[2]
-            cmd += ' -wdir %s' % _rundir
+            # TODO: this has been copied from
+            # generate_solver_mpmd_mpiexec and should be refactored
+            luma_dir = os.path.join(d.case_dir, "LUMA")
+            exec_dir = os.path.join(d.exec_dir, "LUMA")
+            shutil.copyfile(luma_dir, exec_dir)
+            shutil.copymode(luma_dir, exec_dir)
+            path_input = os.path.join(d.case_dir, "input")
+            if os.path.exists(path_input):
+                path_exec_input = os.path.join(d.exec_dir, "input")
+                os.mkdir(path_exec_input)
+                for f in os.listdir(path_input):
+                    p = os.path.join(path_input,f)
+                    shutil.copy(p,path_exec_input)
+            # End of copied code
+
+            s_args = d.solver_command()
+            (rundir, executable, args) = d.solver_command()
+#            cmd = f"{rank_id}-{rank_id + d.n_procs - 1}\t{executable} {args}"
+            cmd = '%d-%d\t%s %s' % (rank_id, rank_id + d.n_procs - 1, executable, args)
 
             e.write(cmd)
             rank_id += d.n_procs
