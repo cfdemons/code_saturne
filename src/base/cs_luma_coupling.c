@@ -1681,7 +1681,10 @@ cs_luma_coupling_recv_data(cs_luma_coupling_t      *luma_coupling,
   
   if(coupling_ent->is_vel_in)
   {	
-	v_luma[0] = -1.0;
+        if (v_luma != NULL)
+        {
+          v_luma[0] = -1.0;
+        }
 	//printf("CS: Receiving velocity data... %f \n", v_luma[0]);
 	  
 	ple_locator_exchange_point_var(coupling_ent->locator,
