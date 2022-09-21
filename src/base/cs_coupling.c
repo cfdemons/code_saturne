@@ -651,7 +651,7 @@ cs_coupling_mesh_extents(const void  *mesh,
                          double       tolerance,
                          double       extents[])
 {
-	printf("CS: I'm in mesh extends\n");
+//	printf("CS: I'm in mesh extends\n");
   const fvm_nodal_t  *m = mesh;
   ple_lnum_t retval = 0;
 
@@ -671,7 +671,7 @@ cs_coupling_mesh_extents(const void  *mesh,
     retval = 1;
   }
   
-  printf("CS: max extends %d. Xmin = %f, ymin = %f, zmin = %f, xmax = %f, ymax = %f, zmax = %f \n", n_max_extents, extents[0], extents[1], extents[2], extents[3], extents[4], extents[5]);
+//  printf("CS: max extends %d. Xmin = %f, ymin = %f, zmin = %f, xmax = %f, ymax = %f, zmax = %f \n", n_max_extents, extents[0], extents[1], extents[2], extents[3], extents[4], extents[5]);
 
   return retval;
 }

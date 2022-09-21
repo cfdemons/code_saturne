@@ -199,6 +199,8 @@ static int  cs_glob_luma_post_mesh_ext[2] = {0, 1};
 
 //static int  cs_luma_coupling_implicit = 0;
 
+bool cs_luma_coupling_debug = false;
+
 /*============================================================================
  *  Private functions definitions
  *============================================================================*/
@@ -423,7 +425,9 @@ _exchange_sync(cs_luma_coupling_t  *luma_coupling,
   }
 
   if (op_name_recv != NULL && cs_glob_rank_id > -1) {
-	printf("CS: Boardcasting message %s .\n", op_name_recv);
+    // if (luma_couping->verbosity > 0) {
+    //   printf("CS: Boardcasting message %s .\n", op_name_recv);
+    // }
     MPI_Bcast(op_name_recv, 32, MPI_CHAR, 0, cs_glob_mpi_comm);
     op_name_recv[32] = '\0';
   }
@@ -658,19 +662,19 @@ _create_coupled_ent(cs_luma_coupling_t  *luma_coupling,
     printf("CS: lenght of out variables %lu \n", strlen(luma_coupling->vars_out));
     for (size_t i = 0; i < strlen(luma_coupling->vars_out); i++)
     {
-      printf("CS: vars_out = %s , vars_out[%lu] = %c \n", luma_coupling->vars_out, i, luma_coupling->vars_out[i]);
+//      printf("CS: vars_out = %s , vars_out[%lu] = %c \n", luma_coupling->vars_out, i, luma_coupling->vars_out[i]);
     
       if ((luma_coupling->vars_out[i] == 'v') ||
         (luma_coupling->vars_out[i] == 'V'))
       {
-        printf("CS: Allocating LUMA velocity, number of elements: %d \n", n_elts);
+//        printf("CS: Allocating LUMA velocity, number of elements: %d \n", n_elts);
         BFT_MALLOC(coupling_ent->vel_out, 3 * n_elts, cs_real_t);
         coupling_ent->is_vel_out = true;
       }
       else if ((luma_coupling->vars_out[i] == 'T') ||
         (luma_coupling->vars_out[i] == 'T'))
       {
-        printf("CS: Allocating LUMA temperature?\n");
+//        printf("CS: Allocating LUMA temperature?\n");
         BFT_MALLOC(coupling_ent->temp_out, n_elts, cs_real_t);
         coupling_ent->is_temp_out = true;
       }
@@ -842,7 +846,9 @@ _create_coupled_ent(cs_luma_coupling_t  *luma_coupling,
   coupling_ent->locator = ple_locator_create();
 #endif
 
-  printf("CS: Hi before ple_locator_set_mesh \n");
+  if (luma_coupling->verbosity > 0) {
+    printf("CS: Hi before ple_locator_set_mesh \n");
+  }
 
   ple_locator_set_mesh(coupling_ent->locator,
                        location_elts,
@@ -858,9 +864,13 @@ _create_coupled_ent(cs_luma_coupling_t  *luma_coupling,
                        cs_coupling_mesh_extents,
                        cs_coupling_point_in_mesh);
 					   
+  if (luma_coupling->verbosity > 0) {
 	printf("CS: Hi after ple_locator_set_mesh \n");
+  }
 
+  if (luma_coupling->verbosity > 0) {
    printf( "*-*-*-*-*-I am testing the location from the distant mesh in CS part*-*-*-*-*-*-*-*-* \n" );
+  }
 
 	size_t nCoupledPoints = ple_locator_get_n_dist_points(coupling_ent->locator);
 	const cs_lnum_t* IDCoupledPoints = ple_locator_get_dist_locations(coupling_ent->locator);
@@ -874,7 +884,9 @@ _create_coupled_ent(cs_luma_coupling_t  *luma_coupling,
                                             &ext_luma);
 											
   
-  printf("location complete? %d. Number of points not located: %d \n", location_complete, ple_locator_get_n_exterior(coupling_ent->locator));
+  if (luma_coupling->verbosity > 0) {
+    printf("location complete? %d. Number of points not located: %d \n", location_complete, ple_locator_get_n_exterior(coupling_ent->locator));
+}
 
   if (luma_coupling->allow_nearest) {
 
@@ -965,7 +977,9 @@ _create_coupled_ent(cs_luma_coupling_t  *luma_coupling,
 
   if (elt_dim == luma_coupling->dim - 1) {
 
+  if (luma_coupling->verbosity > 0) {
     printf("CS: Element dimensions %u, luma dimensions %u\n", elt_dim, luma_coupling->dim);
+  }
 
     cs_lnum_t n_dist_elts = ple_locator_get_n_dist_points(coupling_ent->locator);
 
@@ -1182,9 +1196,11 @@ _init_comm(cs_luma_coupling_t *luma_coupling,
   if (mpi_flag == 0)
     return;
 
+  if (luma_coupling->verbosity > 0) {
   bft_printf(_(" LUMA coupling %d: initializing MPI communication ... "),
              coupling_id);
   bft_printf_flush();
+  }
 
   // NOTE: I'm not sure this will work with LUMA, since LUMA is using the ple_communicator
   ple_coupling_mpi_intracomm_create(MPI_COMM_WORLD,
@@ -1235,7 +1251,9 @@ _init_all_mpi_luma(int  *n_unmatched,
 
   const int n_apps = ple_coupling_mpi_set_n_apps(mpi_apps);
   
-  printf("CS: Initialising MPI LUMA coupling. Number of MPI apps = %d \n", n_apps);
+  if (cs_glob_rank_id == 0) {
+    printf("CS: Initialising MPI LUMA coupling. Number of MPI apps = %d \n", n_apps);
+  }
 
   /* Loop on applications */
 
@@ -1243,7 +1261,9 @@ _init_all_mpi_luma(int  *n_unmatched,
 
     ple_coupling_mpi_set_info_t ai = ple_coupling_mpi_set_get_info(mpi_apps, i);
 	
+  if (cs_glob_rank_id == 0) {
 	printf("CS: App number %d, app_type %s \n", i, ai.app_type);
+  }
 
     if (strncmp(ai.app_type, "LUMA", 4) == 0) {
 
@@ -1275,7 +1295,9 @@ _init_all_mpi_luma(int  *n_unmatched,
         if (_n_unmatched == 0)
           BFT_FREE(_unmatched_ids);
 
+  if (cs_glob_rank_id == 0) {
 		printf("CS: Coupling ID %d \n", coupling_id);
+  }
 	  
         /* Set communicator */
         cs_luma_coupling_init_comm(cs_luma_coupling_by_id(coupling_id),
@@ -1353,7 +1375,9 @@ _mpi_luma_default_name(void)
     const ple_coupling_mpi_set_info_t
       ai = ple_coupling_mpi_set_get_info(mpi_apps, i);
 	// DEBUG!!!
+  if (cs_glob_rank_id == 0) {
 	printf("CS: Coupled app type %s \n", ai.app_type);
+  }
 	
     if (strncmp(ai.app_type, "LUMA", 4) == 0) {
       if (n_luma_apps == 0)
@@ -2047,7 +2071,9 @@ cs_luma_coupling_recv_boundary(int        nvar,
 			}
 			//double totalFlowRate = 0;
 			//MPI_Allreduce(flowRate, totalFlowRate,1,MPI_DOUBLE, MPI_SUM, cs_glob_mpi_comm);
-			printf("CS: Received flow rate from LUMA %f \n", flowRate);
+                        if (luma_coupling->verbosity > 0) {
+                          printf("CS: Received flow rate from LUMA %f \n", flowRate);
+                        }
 			
 			
 	  
@@ -2111,9 +2137,13 @@ cs_luma_coupling_init_mesh(cs_luma_coupling_t  *luma_coupling)
                                               luma_coupling->n_v_locations,
                                               luma_coupling->v_location_ids,
                                               luma_coupling->dim);
+    if (luma_coupling->verbosity > 0) {
 	printf("CS: Finished creating the volume coupled entity \n");
+    }
     match_flag += _sync_after_location(luma_coupling);
+    if (luma_coupling->verbosity > 0) {
 	printf("CS: Syncronisation with LUMA complete \n");
+    }
   }
 
   /* Communication with LUMA */
