@@ -182,18 +182,18 @@ cs_coupling_discover_mpi_apps(const char  *app_name,
   int mpi_flag;
   int world_size;
   
-  printf("hello at the begining of discover mpi apps\n");
+//  printf("hello at the begining of discover mpi apps\n");
   
   MPI_Initialized(&mpi_flag);
   
-  printf("hello after mpi initialised\n");
+//  printf("hello after mpi initialised\n");
 
   if (!mpi_flag)
     return;
 
   MPI_Comm_size(MPI_COMM_WORLD, &world_size);
   
-  printf("global ranks: %d world size: %d \n",cs_glob_n_ranks, world_size);
+//  printf("global ranks: %d world size: %d \n",cs_glob_n_ranks, world_size);
 
   if (cs_glob_n_ranks < world_size) {
 
@@ -232,7 +232,7 @@ cs_coupling_discover_mpi_apps(const char  *app_name,
                                       MPI_COMM_WORLD,
                                       cs_glob_mpi_comm);
 									  
-	printf("Hello after ple_coupling_mpi_set_create\n");
+//	printf("Hello after ple_coupling_mpi_set_create\n");
 
     n_apps = ple_coupling_mpi_set_n_apps(_cs_glob_coupling_mpi_app_world);
     app_id = ple_coupling_mpi_set_get_app_id(_cs_glob_coupling_mpi_app_world);

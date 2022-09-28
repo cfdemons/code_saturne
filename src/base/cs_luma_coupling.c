@@ -528,7 +528,9 @@ _is_location_complete(cs_luma_coupling_t      *luma_coupling,
   if (!strcmp(op_name_recv, "coupling:location:incomplete")) {
     location_complete = false;
     *ext_luma = true;
+  if (luma_coupling->verbosity > 0) {
 	printf("CS: LUMA sent location incomplete message. \n");
+  }
   }
   else
     *ext_luma = false;
@@ -632,19 +634,25 @@ _create_coupled_ent(cs_luma_coupling_t  *luma_coupling,
   {
     for (size_t i = 0; i < strlen(luma_coupling->vars_in); i++)
     {
-      printf("CS: vars_in = %s , vars_in[%lu] = %c \n", luma_coupling->vars_in, i, luma_coupling->vars_in[i]);
+      if (luma_coupling->verbosity > 0) {
+        printf("CS: vars_in = %s , vars_in[%lu] = %c \n", luma_coupling->vars_in, i, luma_coupling->vars_in[i]);
+      }
     
       if ((luma_coupling->vars_in[i] == 'v') ||
         (luma_coupling->vars_in[i] == 'V'))
       {
-        printf("CS: Allocating LUMA velocity, number of elements: %d \n", n_elts);
+        if (luma_coupling->verbosity > 0) {
+          printf("CS: Allocating LUMA velocity, number of elements: %d \n", n_elts);
+        }
         BFT_MALLOC(coupling_ent->vel_in, 3 * n_elts, cs_real_t);
         coupling_ent->is_vel_in = true;
       }
       else if ((luma_coupling->vars_in[i] == 't') ||
         (luma_coupling->vars_in[i] == 'T'))
       {
-        printf("CS: Allocating LUMA temperature?\n");
+        if (luma_coupling->verbosity > 0) {
+          printf("CS: Allocating LUMA temperature?\n");
+        }
         BFT_MALLOC(coupling_ent->temp_in, n_elts, cs_real_t);
         coupling_ent->is_temp_in = true;
       }
@@ -659,7 +667,9 @@ _create_coupled_ent(cs_luma_coupling_t  *luma_coupling,
   // Only the "cells" coupled entity will have vars out, no vars_in
   if (elt_dim == luma_coupling->dim)
   {
-    printf("CS: lenght of out variables %lu \n", strlen(luma_coupling->vars_out));
+    if (luma_coupling->verbosity > 0) {
+      printf("CS: lenght of out variables %lu \n", strlen(luma_coupling->vars_out));
+    }
     for (size_t i = 0; i < strlen(luma_coupling->vars_out); i++)
     {
 //      printf("CS: vars_out = %s , vars_out[%lu] = %c \n", luma_coupling->vars_out, i, luma_coupling->vars_out[i]);
@@ -874,8 +884,10 @@ _create_coupled_ent(cs_luma_coupling_t  *luma_coupling,
 
 	size_t nCoupledPoints = ple_locator_get_n_dist_points(coupling_ent->locator);
 	const cs_lnum_t* IDCoupledPoints = ple_locator_get_dist_locations(coupling_ent->locator);
+  if (luma_coupling->verbosity > 0) {
 	for (int ii = 0; ii < nCoupledPoints; ii++)
 		printf( "%d  ", IDCoupledPoints[ii]); 
+  }
    
 
   location_complete = _is_location_complete(luma_coupling,
@@ -2117,11 +2129,16 @@ cs_luma_coupling_init_mesh(cs_luma_coupling_t  *luma_coupling)
 
   // DEBUG!: Check if the input to the coupling and the CS configuration works. 
   // "inlet" is a boundary, then n_b_location = 1
-  for (int i = 0; i < luma_coupling->n_b_locations; i++)
-	printf("CS: Number of boundary locations %d and location id %d \n", luma_coupling->n_b_locations, luma_coupling->b_location_ids[i]);
-  for (int i = 0; i < luma_coupling->n_v_locations; i++)
+  for (int i = 0; i < luma_coupling->n_b_locations; i++) {
+    if (luma_coupling->verbosity > 0) {
+      printf("CS: Number of boundary locations %d and location id %d \n", luma_coupling->n_b_locations, luma_coupling->b_location_ids[i]);
+    }
+  }
+  for (int i = 0; i < luma_coupling->n_v_locations; i++) {
+    if (luma_coupling->verbosity > 0) {
 	printf("CS: Number of volume locations %d and location id %d \n", luma_coupling->n_v_locations, luma_coupling->v_location_ids[i]);
-  
+    }
+  }
  
   if (luma_coupling->n_b_locations > 0) {
 	// NOTE: does _create_coupling_ent creates one element of faces for each n_b_location? No, it only creates one cs_luma_coupling_ent_t
@@ -2352,8 +2369,9 @@ cs_luma_coupling_add_location(cs_luma_coupling_t  *luma_coupling,
 
   if (l_type == CS_MESH_LOCATION_BOUNDARY_FACES) {
 	
+  if (luma_coupling->verbosity > 0) {
 	printf("CS: Boundary mesh located\n");
-	
+  }	
     int i = luma_coupling->n_b_locations;
     luma_coupling->n_b_locations += 1;
     BFT_REALLOC(luma_coupling->b_location_ids, luma_coupling->n_b_locations, int);
@@ -2363,7 +2381,9 @@ cs_luma_coupling_add_location(cs_luma_coupling_t  *luma_coupling,
 
   else if (l_type == CS_MESH_LOCATION_CELLS) {
 	  
+  if (luma_coupling->verbosity > 0) {
 	printf("CS: Cell mesh located\n");  
+  }
 	  
     int i = luma_coupling->n_v_locations;
     luma_coupling->n_v_locations += 1;
@@ -2595,7 +2615,9 @@ cs_luma_coupling_create(int          dim,
 	  luma_coupling->vars_in[0] = '\0';
   }
   
+  if (luma_coupling->verbosity > 0) {
   printf("CS: vars_out %s \n", vars_out);
+  }
   if (vars_out != NULL) {
 	  BFT_MALLOC(luma_coupling->vars_out, strlen(vars_out) + 1, char);
 	  strcpy(luma_coupling->vars_out, vars_out);
