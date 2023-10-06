@@ -1,0 +1,172 @@
+Package: code-saturne
+Version: 7.0.2+repack-1~exp1
+Architecture: amd64
+Maintainer: Debian Science Team <debian-science-maintainers@lists.alioth.debian.org>
+Installed-Size: 79
+Depends: code-saturne-bin (= 7.0.2+repack-1~exp1), code-saturne-data (= 7.0.2+repack-1~exp1), code-saturne-include (= 7.0.2+repack-1~exp1), python3-pyqt5
+Recommends: bash-completion, paraview, pdf-viewer, code-saturne-doc
+Suggests: syrthes
+Filename: pool/main/code-saturne_7.0.2+repack-1~exp1_amd64.deb
+Size: 69420
+MD5sum: 086a1fabcbdd96789dded78ff5dc0424
+SHA1: 0b85253df87ea9fc11980f207d605c1710f59538
+SHA256: 96e53ce808423f80268f56a22cf3a6c4f5d4f2ab6b6e9028e426febfea899c6a
+Section: science
+Priority: optional
+Homepage: http://www.code-saturne.org/
+Description: General purpose Computational Fluid Dynamics (CFD) software
+ The basic capabilities of Code_Saturne enable the handling of either
+ incompressible or expandable flows with or without heat transfer and
+ turbulence. Dedicated modules are available for specific physics such
+ as radiative heat transfer, combustion (gas, coal, heavy fuel oil, ...),
+ magneto-hydrodynamics, compressible flows, two-phase flows
+ (Euler-Lagrange approach with two-way coupling), extensions to
+ specific applications (e.g. Mercure_Saturne for atmospheric
+ environment).
+ .
+ It runs in parallel with MPI on distributed memory machines.
+ Developed since 1997 at EDF R&D, it is based on a co-located Finite
+ Volume approach that accepts meshes with any type of cell
+ (tetrahedral, hexahedral, prismatic, pyramidal, polyhedral...) and any
+ type of grid structure (unstructured, block structured, hybrid,
+ conforming or with hanging nodes, ...).
+
+Package: code-saturne-bin
+Source: code-saturne
+Version: 7.0.2+repack-1~exp1
+Architecture: amd64
+Maintainer: Debian Science Team <debian-science-maintainers@lists.alioth.debian.org>
+Installed-Size: 10286
+Depends: libc6 (>= 2.34), libcgns3.4 (>= 3.4.0), libgfortran5 (>= 10), libgomp1 (>= 6), libmedc11, libopenmpi3 (>= 4.1.2), zlib1g (>= 1:1.1.4), python3, libxml2-dev, libblas-dev
+Recommends: code-saturne
+Filename: pool/main/code-saturne-bin_7.0.2+repack-1~exp1_amd64.deb
+Size: 4193240
+MD5sum: c6945535c74be2ccf00c1b2d37348fe0
+SHA1: d4acaca3f4dc0781cfaed65bdf36c77220c18cc5
+SHA256: 71f52f37b5ce97fe9bb953d0808fd6b1e291350fe2d1b7c7e26c510adad30b4b
+Section: science
+Priority: optional
+Homepage: http://www.code-saturne.org/
+Description: General purpose Computational Fluid Dynamics (CFD) software - binaries
+ The basic capabilities of Code_Saturne enable the handling of either
+ incompressible or expandable flows with or without heat transfer and
+ turbulence. Dedicated modules are available for specific physics such
+ as radiative heat transfer, combustion (gas, coal, heavy fuel oil, ...),
+ magneto-hydrodynamics, compressible flows, two-phase flows
+ (Euler-Lagrange approach with two-way coupling), extensions to
+ specific applications (e.g. Mercure_Saturne for atmospheric
+ environment).
+ .
+ It runs in parallel with MPI on distributed memory machines.
+ Developed since 1997 at EDF R&D, it is based on a co-located Finite
+ Volume approach that accepts meshes with any type of cell
+ (tetrahedral, hexahedral, prismatic, pyramidal, polyhedral...) and any
+ type of grid structure (unstructured, block structured, hybrid,
+ conforming or with hanging nodes, ...).
+ .
+ This package contains the binary files.
+
+Package: code-saturne-data
+Source: code-saturne
+Version: 7.0.2+repack-1~exp1
+Architecture: all
+Maintainer: Debian Science Team <debian-science-maintainers@lists.alioth.debian.org>
+Installed-Size: 103840
+Depends: python3:any
+Recommends: code-saturne
+Filename: pool/main/code-saturne-data_7.0.2+repack-1~exp1_all.deb
+Size: 12418316
+MD5sum: f0e73321ae393da58223e21d79f3dea3
+SHA1: be878f14f8ee7ad1b90e51c4c24b567840f3b331
+SHA256: 7fc41dc5d116b937228c0c682657bc3e6f88fa8fe1476a7ffacf00dfa06baa9c
+Section: science
+Priority: optional
+Homepage: http://www.code-saturne.org/
+Description: General purpose Computational Fluid Dynamics (CFD) software - data
+ The basic capabilities of Code_Saturne enable the handling of either
+ incompressible or expandable flows with or without heat transfer and
+ turbulence. Dedicated modules are available for specific physics such
+ as radiative heat transfer, combustion (gas, coal, heavy fuel oil, ...),
+ magneto-hydrodynamics, compressible flows, two-phase flows
+ (Euler-Lagrange approach with two-way coupling), extensions to
+ specific applications (e.g. Mercure_Saturne for atmospheric
+ environment).
+ .
+ It runs in parallel with MPI on distributed memory machines.
+ Developed since 1997 at EDF R&D, it is based on a co-located Finite
+ Volume approach that accepts meshes with any type of cell
+ (tetrahedral, hexahedral, prismatic, pyramidal, polyhedral...) and any
+ type of grid structure (unstructured, block structured, hybrid,
+ conforming or with hanging nodes, ...).
+ .
+ This package contains the data.
+
+Package: code-saturne-doc
+Source: code-saturne
+Version: 7.0.2+repack-1~exp1
+Architecture: all
+Maintainer: Debian Science Team <debian-science-maintainers@lists.alioth.debian.org>
+Installed-Size: 163679
+Filename: pool/main/code-saturne-doc_7.0.2+repack-1~exp1_all.deb
+Size: 14925592
+MD5sum: b4bc5c424ce9fc116e706f28962b1ec2
+SHA1: 2a9dd08364a59a8b957e1886181aab0491ed5b48
+SHA256: fb0c79e663ec708a2f29b951ee4d966cf0b28a8a85dbaf2284c31ced9280f872
+Section: doc
+Priority: optional
+Homepage: http://www.code-saturne.org/
+Description: General purpose Computational Fluid Dynamics (CFD) software - Documentation
+ The basic capabilities of Code_Saturne enable the handling of either
+ incompressible or expandable flows with or without heat transfer and
+ turbulence. Dedicated modules are available for specific physics such
+ as radiative heat transfer, combustion (gas, coal, heavy fuel oil, ...),
+ magneto-hydrodynamics, compressible flows, two-phase flows
+ (Euler-Lagrange approach with two-way coupling), extensions to
+ specific applications (e.g. Mercure_Saturne for atmospheric
+ environment).
+ .
+ It runs in parallel with MPI on distributed memory machines.
+ Developed since 1997 at EDF R&D, it is based on a co-located Finite
+ Volume approach that accepts meshes with any type of cell
+ (tetrahedral, hexahedral, prismatic, pyramidal, polyhedral...) and any
+ type of grid structure (unstructured, block structured, hybrid,
+ conforming or with hanging nodes, ...).
+ .
+ This package contains the documentation.
+
+Package: code-saturne-include
+Source: code-saturne
+Version: 7.0.2+repack-1~exp1
+Architecture: amd64
+Maintainer: Debian Science Team <debian-science-maintainers@lists.alioth.debian.org>
+Installed-Size: 4942
+Depends: python3:any, libcgns-dev, libmedc-dev, libhdf5-dev, zlib1g-dev, mpi-default-dev, libxml2-dev
+Breaks: code-saturne-data (<< 3.3.2-3)
+Replaces: code-saturne-data (<< 3.3.2-3)
+Filename: pool/main/code-saturne-include_7.0.2+repack-1~exp1_amd64.deb
+Size: 671366
+MD5sum: 32019fb3a639536879d212f741e16746
+SHA1: 66c0e75f156813560ef701dffb57e61630486c00
+SHA256: d59b01f45047f9f0b0a3630057b706fb9e177025b0b07906ac47f7126928e430
+Section: science
+Priority: optional
+Homepage: http://www.code-saturne.org/
+Description: General purpose Computational Fluid Dynamics (CFD) software - includes
+ The basic capabilities of Code_Saturne enable the handling of either
+ incompressible or expandable flows with or without heat transfer and
+ turbulence. Dedicated modules are available for specific physics such
+ as radiative heat transfer, combustion (gas, coal, heavy fuel oil, ...),
+ magneto-hydrodynamics, compressible flows, two-phase flows
+ (Euler-Lagrange approach with two-way coupling), extensions to
+ specific applications (e.g. Mercure_Saturne for atmospheric
+ environment).
+ .
+ It runs in parallel with MPI on distributed memory machines.
+ Developed since 1997 at EDF R&D, it is based on a co-located Finite
+ Volume approach that accepts meshes with any type of cell
+ (tetrahedral, hexahedral, prismatic, pyramidal, polyhedral...) and any
+ type of grid structure (unstructured, block structured, hybrid,
+ conforming or with hanging nodes, ...).
+ .
+ This package contains the include files.
+

@@ -1,0 +1,9 @@
+Origin: Ubuntu
+Label: Ubuntu
+Suite: jammy
+Version: 22.04
+Codename: jammy
+Date: Fri, 06 Oct 2023 14:17:36 +0000
+Architectures: amd64 all
+Components: main
+Description: Ubuntu Jammy 22.04
