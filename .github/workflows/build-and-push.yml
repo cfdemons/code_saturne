@@ -19,19 +19,19 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # - name: Build image
-      #   run: |
-      #     docker build -t codesaturne/7.0.2 .
+      - name: Build image
+        run: |
+          docker build -t codesaturne/7.0.2 .
 
-      # - name: Copy tarball from image
-      #   run: |
-      #     mkdir packages
-      #     docker run -v ./packages:/packages codesaturne/7.0.2 cp -a /opt/packages/code_saturne-7.0.2-jammy.tar.gz /packages
-
-      - name: Create fake release
+      - name: Copy tarball from image
         run: |
           mkdir packages
-          echo "Fake release" > packages/code_saturne-7.0.2-jammy.tar.gz
+          docker run -v ./packages:/packages codesaturne/7.0.2 cp -a /opt/packages/code_saturne-7.0.2-jammy.tar.gz /packages
+
+      # - name: Create fake release
+      #   run: |
+      #     mkdir packages
+      #     echo "Fake release" > packages/code_saturne-7.0.2-jammy.tar.gz
 
       - name: Create release
         run: |
