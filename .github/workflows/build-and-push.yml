@@ -1,0 +1,43 @@
+
+name: Build and push Code_Saturne
+
+on:
+  push:
+    branches: ['release']
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Log in to the Container registry
+        uses: docker/login-action@65b78e6e13532edd9afa3aa52ac7964289d1a9c1
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build image
+        run: |
+          docker build -t codesaturne/7.0.2 .
+
+      - name: Copy tarball from image
+        run: |
+          mkdir packages
+          docker run -v ./packages:/packages codesaturne/7.0.2 cp -a /opt/packages/code_saturne-7.0.2-jammy.tar.gz /packages
+
+      - name: Upload release
+        run: |
+           gh release upload v7.0.2 packages/code_saturne-7.0.2-jammy.tar.gz
