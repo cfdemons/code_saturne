@@ -39,6 +39,12 @@ jobs:
             gh release create v7.0.2
           fi
 
+      - name: Delete existing asset
+        run: |
+          if gh release view | grep 'asset:.*code_saturne-7.0.2-jammy.tar.gz'; then
+            gh release delete-asset code_saturne-7.0.2-jammy.tar.gz
+          fi
+
       - name: Upload release
         run: |
            gh release upload v7.0.2 packages/code_saturne-7.0.2-jammy.tar.gz
