@@ -29,14 +29,23 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Build image
-        run: |
-          docker build -t codesaturne/7.0.2 .
+      # - name: Build image
+      #   run: |
+      #     docker build -t codesaturne/7.0.2 .
 
-      - name: Copy tarball from image
+      # - name: Copy tarball from image
+      #   run: |
+      #     mkdir packages
+      #     docker run -v ./packages:/packages codesaturne/7.0.2 cp -a /opt/packages/code_saturne-7.0.2-jammy.tar.gz /packages
+
+      - name: Create fake release
         run: |
           mkdir packages
-          docker run -v ./packages:/packages codesaturne/7.0.2 cp -a /opt/packages/code_saturne-7.0.2-jammy.tar.gz /packages
+          touch packages/code_saturne-7.0.2-jammy.tar.gz
+
+      - name: Create release
+        run: |
+           gh release create v7.0.2
 
       - name: Upload release
         run: |
