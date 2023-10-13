@@ -31,7 +31,7 @@ jobs:
       - name: Create fake release
         run: |
           mkdir packages
-          touch packages/code_saturne-7.0.2-jammy.tar.gz
+          echo "Fake release" > packages/code_saturne-7.0.2-jammy.tar.gz
 
       - name: Create release
         run: |
