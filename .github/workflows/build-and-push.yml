@@ -35,7 +35,9 @@ jobs:
 
       - name: Create release
         run: |
-           gh release create v7.0.2
+          if ! gh release list | grep v7.0.2; then
+            gh release create v7.0.2
+          fi
 
       - name: Upload release
         run: |
